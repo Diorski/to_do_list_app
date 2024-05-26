@@ -12,6 +12,11 @@
         <input type="text" name="task" placeholder="Enter a new task">
         <button type="submit">Add</button>
     </form>
+    <div>
+        <a href="/">All Tasks</a> |
+        <a href="/completed">Completed Tasks</a> |
+        <a href="/incomplete">Incomplete Tasks</a>
+    </div>
     <ul>
         {% for task in tasks %}
             <li>

@@ -5,8 +5,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
 db = SQLAlchemy(app)
 
-tasks = []  # List to store the tasks
-
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task = db.Column(db.String(200), nullable=False)
@@ -19,17 +17,6 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add():
-    """
-    Add a new task to the to-do list.
-
-    This function is triggered when a POST request is made to the '/add' endpoint.
-    It retrieves the task content from the request form and creates a new Task object.
-    The new task is then added to the database session and committed.
-    Finally, the function redirects the user to the 'index' endpoint.
-
-    Returns:
-        A redirect response to the 'index' endpoint.
-    """
     task_content = request.form.get('task')
     if task_content:
         new_task = Task(task=task_content)
@@ -46,16 +33,6 @@ def delete(task_id):
 
 @app.route('/edit/<int:task_id>', methods=['POST'])
 def edit(task_id):
-    """
-    Edit a task with the given task_id.
-
-    Parameters:
-    - task_id (int): The ID of the task to be edited.
-
-    Returns:
-    - redirect: Redirects to the 'index' route after editing the task.
-
-    """
     task_content = request.form.get('task')
     task_to_edit = Task.query.get_or_404(task_id)
     if task_content:
@@ -69,6 +46,16 @@ def complete(task_id):
     task_to_complete.completed = True
     db.session.commit()
     return redirect(url_for('index'))
+
+@app.route('/completed')
+def completed():
+    tasks = Task.query.filter_by(completed=True).all()
+    return render_template('index.html', tasks=tasks, enumerate=enumerate)
+
+@app.route('/incomplete')
+def incomplete():
+    tasks = Task.query.filter_by(completed=False).all()
+    return render_template('index.html', tasks=tasks, enumerate=enumerate)
 
 if __name__ == '__main__':
     db.create_all()
