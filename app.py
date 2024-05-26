@@ -47,13 +47,20 @@ def complete(task_id):
     db.session.commit()
     return redirect(url_for('index'))
 
+@app.route('/incomplete/<int:task_id>')
+def incomplete(task_id):
+    task_to_incomplete = Task.query.get_or_404(task_id)
+    task_to_incomplete.completed = False
+    db.session.commit()
+    return redirect(url_for('index'))
+
 @app.route('/completed')
 def completed():
     tasks = Task.query.filter_by(completed=True).all()
     return render_template('index.html', tasks=tasks, enumerate=enumerate)
 
 @app.route('/incomplete')
-def incomplete():
+def incomplete_tasks():
     tasks = Task.query.filter_by(completed=False).all()
     return render_template('index.html', tasks=tasks, enumerate=enumerate)
 

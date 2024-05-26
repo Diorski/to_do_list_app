@@ -22,6 +22,7 @@
             <li>
                 {% if task.completed %}
                     <span style="text-decoration: line-through;">{{ task.task }}</span>
+                    <a href="/incomplete/{{ task.id }}">Mark as Incomplete</a>
                 {% else %}
                     <form action="/edit/{{ task.id }}" method="post" style="display:inline;">
                         <input type="text" name="task" value="{{ task.task }}">
