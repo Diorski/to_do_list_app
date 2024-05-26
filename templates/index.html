@@ -36,7 +36,13 @@
     </form>
     <ul>
         {% for i, task in enumerate(tasks) %}
-            <li>{{ task }} <a href="/delete/{{ i }}">Delete</a></li>
+            <li>
+                <form action="/edit/{{ i }}" method="post" style="display:inline;">
+                    <input type="text" name="task" value="{{ task }}">
+                    <button type="submit">Edit</button>
+                </form>
+                <a href="/delete/{{ i }}">Delete</a>
+            </li>
         {% endfor %}
     </ul>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
