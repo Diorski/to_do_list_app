@@ -58,5 +58,21 @@ def edit(task_id):
         tasks[task_id] = new_task
     return redirect(url_for('index'))
 
+
+@app.route('/complete/<int:task_id>')
+def complete(task_id):
+    """
+    Marks a task as completed in the tasks list based on the given task_id.
+
+    Args:
+        task_id (int): The id of the task to be marked as completed.
+
+    Returns:
+        Redirects to the index route.
+    """
+    if 0 <= task_id < len(tasks):
+        tasks[task_id]['completed'] = True
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.run(debug=True)
