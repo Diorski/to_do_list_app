@@ -13,18 +13,18 @@
         <button type="submit">Add</button>
     </form>
     <ul>
-        {% for i, task in enumerate(tasks) %}
+        {% for task in tasks %}
             <li>
                 {% if task.completed %}
                     <span style="text-decoration: line-through;">{{ task.task }}</span>
                 {% else %}
-                    <form action="/edit/{{ i }}" method="post" style="display:inline;">
+                    <form action="/edit/{{ task.id }}" method="post" style="display:inline;">
                         <input type="text" name="task" value="{{ task.task }}">
                         <button type="submit">Edit</button>
                     </form>
-                    <a href="/complete/{{ i }}">Complete</a>
+                    <a href="/complete/{{ task.id }}">Complete</a>
                 {% endif %}
-                <a href="/delete/{{ i }}">Delete</a>
+                <a href="/delete/{{ task.id }}">Delete</a>
             </li>
         {% endfor %}
     </ul>

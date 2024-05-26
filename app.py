@@ -1,78 +1,75 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
+db = SQLAlchemy(app)
 
 tasks = []  # List to store the tasks
 
-@app.route('/')  # Home route
-def index():
-    """
-    Renders the index.html template and passes the tasks list to it.
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
 
-    Returns:
-        The rendered index.html template.
-    """
+@app.route('/')
+def index():
+    tasks = Task.query.all()
     return render_template('index.html', tasks=tasks, enumerate=enumerate)
 
-@app.route('/add', methods=['POST'])  # Add route
+@app.route('/add', methods=['POST'])
 def add():
     """
-    Adds a new task to the tasks list.
+    Add a new task to the to-do list.
+
+    This function is triggered when a POST request is made to the '/add' endpoint.
+    It retrieves the task content from the request form and creates a new Task object.
+    The new task is then added to the database session and committed.
+    Finally, the function redirects the user to the 'index' endpoint.
 
     Returns:
-        Redirects to the index route.
+        A redirect response to the 'index' endpoint.
     """
-    task = request.form('task')
-    if task:
-        tasks.append(task)
+    task_content = request.form.get('task')
+    if task_content:
+        new_task = Task(task=task_content)
+        db.session.add(new_task)
+        db.session.commit()
     return redirect(url_for('index'))
 
-@app.route('/delete/<int:task_id>')  # Delete route
+@app.route('/delete/<int:task_id>')
 def delete(task_id):
-    """
-    Deletes a task from the tasks list based on the given task_id.
-
-    Args:
-        task_id (int): The id of the task to be deleted.
-
-    Returns:
-        Redirects to the index route.
-    """
-    if 0 <= task_id < len(tasks):
-        tasks.pop(task_id)
+    task_to_delete = Task.query.get_or_404(task_id)
+    db.session.delete(task_to_delete)
+    db.session.commit()
     return redirect(url_for('index'))
 
-@app.route('/edit/<int:task_id>', methods=['POST'])  # Edit route
+@app.route('/edit/<int:task_id>', methods=['POST'])
 def edit(task_id):
     """
-    Edits a task in the tasks list based on the given task_id.
+    Edit a task with the given task_id.
 
-    Args:
-        task_id (int): The id of the task to be edited.
+    Parameters:
+    - task_id (int): The ID of the task to be edited.
 
     Returns:
-        Redirects to the index route.
-    """
-    new_task = request.form.get('task')
-    if 0 <= task_id < len(tasks) and new_task:
-        tasks[task_id] = new_task
-    return redirect(url_for('index'))
+    - redirect: Redirects to the 'index' route after editing the task.
 
+    """
+    task_content = request.form.get('task')
+    task_to_edit = Task.query.get_or_404(task_id)
+    if task_content:
+        task_to_edit.task = task_content
+        db.session.commit()
+    return redirect(url_for('index'))
 
 @app.route('/complete/<int:task_id>')
 def complete(task_id):
-    """
-    Marks a task as completed in the tasks list based on the given task_id.
-
-    Args:
-        task_id (int): The id of the task to be marked as completed.
-
-    Returns:
-        Redirects to the index route.
-    """
-    if 0 <= task_id < len(tasks):
-        tasks[task_id]['completed'] = True
+    task_to_complete = Task.query.get_or_404(task_id)
+    task_to_complete.completed = True
+    db.session.commit()
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True)
